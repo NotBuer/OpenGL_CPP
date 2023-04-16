@@ -25,7 +25,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // Create the window.
-    GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Test Window", NULL, NULL);
+    GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL App", NULL, NULL);
     if (!mainWindow) {
         printf("GLFW window creation failed!");
         glfwTerminate();
@@ -41,6 +41,29 @@ int main()
 
     // Allow modern extension features.
     glewExperimental = GL_TRUE;
+
+    if (glewInit() != GLEW_OK) {
+        printf("GLEW initialization failed!");
+        glfwDestroyWindow(mainWindow);
+        glfwTerminate();
+        return 1;
+    }
+
+    // Setup viewport size.
+    glViewport(0, 0, bufferWidth, bufferHeight);
+
+    // Loop until window closed.
+    while (!glfwWindowShouldClose(mainWindow)) {
+
+        // Get and Handle input events.
+        glfwPollEvents();
+
+        // Clear window.
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glfwSwapBuffers(mainWindow);
+    }
 
     return 0;
 }
