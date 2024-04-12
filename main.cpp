@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 const GLint WIDTH = 800, HEIGHT = 600;
+const float toRadians = 3.14159256f / 180.0f;
 
 GLuint VAO, VBO, shader, uniformModel;
 
@@ -18,16 +19,26 @@ float tri_XOffset = 0.0f;
 float triMaxOffset = 0.7f;
 float triIncrement = 0.0005f;
 
+float current_angle = 0.0f;
+
+bool sizeDirection = true;
+float current_size = 0.4f;
+float maxSize = 0.8f;
+float minSize = 0.1f;
+
 // Vertex Shader
 static const char* vShader = "													\n\
 #version 330																	\n\
 																				\n\
 layout (location = 0) in vec3 pos;												\n\
 																				\n\
+out vec4 vColor;																\n\
+																				\n\
 uniform mat4 model;																\n\
 																				\n\
 void main() {																	\n\
-	gl_Position = model * vec4(0.5f * pos.x, 0.5f * pos.y, 0.5f*pos.z, 1.0);	\n\
+	gl_Position = model * vec4(pos, 1.0);										\n\
+	vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);								\n\
 }																				\n\
 ";
 
@@ -35,11 +46,13 @@ void main() {																	\n\
 static const char* fShader = "									\n\
 #version 330													\n\
 																\n\
+in vec4 vColor;													\n\
+																\n\
 out vec4 color;													\n\
 																\n\
 																\n\
 void main() {													\n\
-	color = vec4(1.0, 0.0, 0.0, 1.0);							\n\
+	color = vColor;												\n\
 }																\n\
 ";
 
@@ -192,6 +205,17 @@ int main()
 		if (abs(tri_XOffset) >= triMaxOffset) 
 			goingRight = !goingRight;
 
+		current_angle += 0.01f;
+		current_angle >= 360 ? current_angle -= 360 : current_angle;
+
+		if (sizeDirection)
+			current_size += 0.0005f;
+		else
+			current_size -= 0.0005f;
+
+		if (current_size >= maxSize || current_size <= minSize)
+			sizeDirection = !sizeDirection;
+
 		// Enable backface culling.
 		glEnable(GL_CULL_FACE);
 
@@ -202,7 +226,9 @@ int main()
 		glUseProgram(shader);
 
 		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(tri_XOffset, 0.0f, 0.0f));
+		//model = glm::rotate(model, current_angle * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		//model = glm::translate(model, glm::vec3(tri_XOffset, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 1.0f));
 
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
